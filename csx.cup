@@ -1,0 +1,235 @@
+/***
+ *
+ * This Is A Java CUP Specification For CSX-lite, a Small Subset
+ * of The CSX Language, used In CS536
+ * Extend this specification to handle all of CSX.
+ *
+ ***/
+
+/* Preliminaries to set up and use the scanner.  */
+
+import java_cup.runtime.*;
+parser code {:
+ public void syntax_error(Symbol cur_token)
+     {
+ 	  report_error("CSX syntax error at line "+
+			String.valueOf(((CSXToken)cur_token.value).linenum),  
+			null);
+     }
+:};
+init with {:              :};
+scan with {: return Scanner.next_token(); :};
+
+/* Terminals (tokens returned by the scanner). */
+terminal CSXIdentifierToken     IDENTIFIER; 
+terminal CSXIntLitToken			INTLIT;
+terminal CSXCharLitToken		CHARLIT;
+terminal CSXStringLitToken		STRLIT;
+terminal CSXToken     			SEMI, LPAREN, RPAREN, LBRACE, RBRACE;
+terminal CSXToken 				COLON, COMMA, LBRACKET, RBRACKET;
+terminal CSXToken     			MINUS, PLUS, SLASH, TIMES;
+terminal CSXToken     			rw_BOOL, rw_BREAK, rw_CHAR, rw_CLASS;
+terminal CSXToken				rw_CONST, rw_CONTINUE, rw_ELSE, rw_FALSE;
+terminal CSXToken				rw_IF, rw_INT, rw_PRINT, rw_READ, rw_RETURN;
+terminal CSXToken				rw_TRUE, rw_VOID, rw_WHILE;
+terminal CSXToken 				EQ, GEQ, GT, LEQ, LT, NOTEQ; 
+terminal CSXToken			 	CAND, COR, NOT;  
+terminal CSXToken	    		ASG, INCREMENT, DECREMENT;  
+
+/* Non terminals */
+non terminal classNode     		prog;  
+non terminal stmtsOption     	stmts;  
+non terminal stmtNode	     	stmt;
+non terminal exprNode			exp;
+non terminal exprNode			unit; 
+non terminal identNode	     	ident;
+non terminal fieldDeclsOption	fielddecls; 
+non terminal declNode			fielddecl;
+non terminal typeNode			type;
+non terminal Symbol		     	optionalSemi;
+non terminal intLitNode		    intliteral;
+
+non terminal argDeclNode		argdecl;
+non terminal argDeclsOption		argdecls;
+non terminal methodDeclNode		methoddecl;
+non terminal methodDeclsOption	methoddecls;
+non terminal memberDeclsNode	memberdecls;
+
+
+start with prog;
+
+prog		::= rw_CLASS:c ident:i LBRACE memberdecls:d RBRACE
+			 	{: 
+			 		RESULT=	new classNode(i, d, c.linenum, c.colnum); 
+			 	:}	
+			;
+
+memberdecls	::=	fielddecl:f memberdecls:m
+				{:
+					RESULT= new memberDeclsNode(new fieldDeclsNode(f, m.fields, 
+						f.linenum, f.colnum), m.methods, f.linenum, f.colnum);
+				:} 
+			|	methoddecls:m
+				{:
+					RESULT= new memberDeclsNode(fieldDeclsNode.NULL, m, 
+														m.linenum, m.linenum);
+				:}
+			;
+
+fielddecls	::= fielddecl:f1 fielddecls:f2 
+				{: 
+				 	RESULT= new fieldDeclsNode(f1,f2, f1.linenum,f1.colnum); 
+				:}	
+   			|
+			 	{: 
+				 	RESULT= fieldDeclsNode.NULL; 
+				:}	
+    		;
+    		
+methoddecls	::= methoddecl:md methoddecls:mds
+				{: 
+					RESULT= new methodDeclsNode(md, mds, md.linenum, md.colnum);
+				:}
+			|
+				{:
+					RESULT= methodDeclsNode.NULL;
+				:}
+			;
+    		
+methoddecl	::= rw_VOID:v ident:i LPAREN RPAREN LBRACE fielddecls:f stmts:s 
+															RBRACE optionalSemi
+				{:
+					RESULT= new methodDeclNode(i, argDeclsNode.NULL, 
+										new voidTypeNode(v.linenum, v.colnum), 
+										f, s, v.linenum, v.colnum);
+				:}
+			|	rw_VOID:v ident:i LPAREN argdecls:args RPAREN LBRACE 
+										fielddecls:f stmts:s RBRACE optionalSemi
+				{:
+					RESULT= new methodDeclNode(i, args, 
+										new voidTypeNode(v.linenum, v.colnum), 
+										f, s, v.linenum, v.colnum);
+				:}
+			|	type:t ident:i LPAREN RPAREN LBRACE fielddecls:f stmts:s 
+														RBRACE optionalSemi
+				{:
+					RESULT= new methodDeclNode(i, argDeclsNode.NULL, t, f, s, 
+										 				t.linenum, t.colnum);
+				:}
+			|	type:t ident:i LPAREN argdecls:args RPAREN LBRACE fielddecls:f 
+													stmts:s RBRACE optionalSemi
+				{:
+					RESULT= new methodDeclNode(i, args, t, f, s, t.linenum, 
+												t.colnum);
+				:}
+			;
+				
+argdecls	::= argdecl:arg COMMA argdecls:args
+				{:
+					RESULT= new argDeclsNode(arg, args, arg.linenum,arg.colnum);
+				:}
+			|	argdecl:arg
+				{:
+					RESULT= new argDeclsNode(arg, argDeclsNode.NULL, 
+											 arg.linenum, arg.colnum);
+				:}
+			;
+
+argdecl		::= type:t ident:i
+				{:
+					RESULT= new valArgDeclNode(i, t, t.linenum, t.colnum);
+				:}
+			|	type:t ident:i LBRACKET RBRACKET
+				{:
+					RESULT= new arrayArgDeclNode(i, t, t.linenum, t.colnum);
+				:}
+			;
+
+
+fielddecl	::= type:t     ident:i      SEMI 
+				{: 
+					RESULT= new varDeclNode(i,t,exprNode.NULL, t.linenum,
+																t.colnum); 
+				:}	
+			|	type:t ident:i	ASG exp:e SEMI
+				{:
+					RESULT= new varDeclNode(i, t, e, t.linenum, t.colnum);
+				:}
+			|	type:t ident:i LBRACKET intliteral:il RBRACKET SEMI
+				{:
+				 	RESULT= new arrayDeclNode(i, t, il, t.linenum, t.colnum);
+				:}
+			|	rw_CONST:c ident:i ASG exp:e SEMI
+				{:
+					RESULT= new constDeclNode(i, e, c.linenum, c.colnum);
+				:}
+    		;
+    		
+type
+   			 ::= rw_INT:t
+	 			{:
+	  				 RESULT=new intTypeNode(t.linenum, t.colnum);
+         		:}	
+    		 |   rw_BOOL:t
+				 {:
+	  				 RESULT=new boolTypeNode(t.linenum, t.colnum);
+         		:}	
+    		; 
+    		
+stmts		::= stmt:s1  stmts:s2
+			 {: RESULT=
+			new stmtsNode(s1,s2,s1.linenum,s1.colnum);
+			 :}	
+		| 
+			 {: RESULT= stmtsNode.NULL; :} 
+		;
+stmt		::= ident:id ASG exp:e SEMI
+			 {: RESULT=
+			new asgNode(new nameNode(id,id.linenum,id.colnum),e,id.linenum,id.colnum);
+			 :}	
+
+		| rw_IF:i LPAREN exp:e RPAREN  stmt:s
+			 {:
+			 RESULT=new ifThenNode(e,s, i.linenum,i.colnum); :}	
+						
+		|   LBRACE:l fielddecls:f stmts:s RBRACE optionalSemi
+	 		{:
+	  			 RESULT=new blockNode(f,s, l.linenum, l.colnum);
+        	 :}	
+        ;
+         
+exp		::= exp:leftval PLUS:op unit:rightval
+			 {: RESULT=new binaryOpNode(leftval,sym.PLUS,rightval,op.linenum,op.colnum); :}	
+		| exp:leftval MINUS:op unit:rightval
+			 {: RESULT=new binaryOpNode(leftval,sym.MINUS,rightval,op.linenum,op.colnum); :}
+		| unit:leftval EQ:op unit:rightval
+			 {: RESULT=new binaryOpNode(leftval,sym.EQ,rightval,op.linenum,op.colnum); :}	
+		| unit:leftval NOTEQ:op unit:rightval
+			 {: RESULT=new binaryOpNode(leftval,sym.NOTEQ,rightval,op.linenum,op.colnum); :}
+	    
+		|   unit:u
+			{: RESULT = u; :}
+		;
+unit    ::=	
+            LPAREN exp:e RPAREN 
+	   		 {: RESULT = e; :}
+        |  ident:i		
+			 {: RESULT = i; :}
+		 | intliteral:l
+	  		  {: RESULT = l; :}
+		;
+ident		::= IDENTIFIER:i
+			 {: RESULT = new identNode(i.identifierText,
+									   i.linenum,i.colnum); :}	
+		;
+		
+intliteral
+   ::= INTLIT:i
+	 {: RESULT = new intLitNode(i.intValue, i.linenum,i.colnum);
+         :}	
+    ;
+		
+optionalSemi
+   		 ::= SEMI
+   		 |
+   		 ;
