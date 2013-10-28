@@ -1,0 +1,18 @@
+CS 536: PROJECT 3 - CSX SCANNER
+
+Caela Northey (cs login: caela)	905 653 2238 
+Alan Irish    (cs login: irish) 906 591 2819
+
+DUE DATE: FRIDAY NOV 1, 2013
+
+********************************************************************************
+
+TO DO::
+ - MAKE GIT REPOSITORY
+ - replace csx.lite from project 2
+   -> add all symbols to lite.cup to properly generate sym.java
+ - modify build.xml as needed
+ - build csx.cup
+   -> add productions to CUP specifications
+   -> add constructor actions to CUP to build AST
+   -> complete unparsing methods for new nodes
