@@ -1,4 +1,13 @@
-/*  This is the driver of the compilation process.
+/***
+ * CS 536: PROJECT 3 - CSX SCANNER
+ *
+ * Caela Northey (cs login: caela)	905 653 2238 
+ * Alan Irish    (cs login: irish) 906 591 2819
+ *
+ *
+ * DUE DATE: FRIDAY NOV 1, 2013
+ *
+ *  This is the driver of the compilation process.
  *  The CSX Lite program is scanned and parsed, and an AST is built.
  *  The AST is then unparsed.
  *  Nothing needs to be changed here.

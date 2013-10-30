@@ -3,6 +3,7 @@ CS 536: PROJECT 3 - CSX SCANNER
 Caela Northey (cs login: caela)	905 653 2238 
 Alan Irish    (cs login: irish) 906 591 2819
 
+
 DUE DATE: FRIDAY NOV 1, 2013
 
 ********************************************************************************
@@ -27,7 +28,7 @@ Relevant files:
              we simply extended it to include the new node classes utilized
              by csx.cup.
 
-	- P3.java: driver for the project (contains main() method).
+	- P3.java: driver for the project (contains main() method, not changed).
 
   - other files not modified but important: ast.java; csx.jlex (from P2)
 
@@ -42,7 +43,6 @@ TO DO::
    -> add constructor actions to CUP to build AST
    -> complete unparsing methods for new nodes
  - modify Unparsing.java
- - modify driver P3.java
 
 QUESTIONS::
  x difference b/w name and ident?
@@ -59,6 +59,9 @@ QUESTIONS::
  - how handle readlist and printlist? what nodes to create there?
    -> use readNode/printNode for readlist/printlist, but then how handle
       stmt -> rw_READ and rw_PRINT? additional new readNode/printNodes?
- - difference b/w callNode and fctCallNode??
+ x difference b/w callNode and fctCallNode??
    -> related to stmt -> id ( ) vs unit -> id ( )?
+   -> callNode extends stmtNode, and fctCallNode extends exprNode =>
+      use callNode for stmt -> ident () and fctCallNode for
+      unit -> ident ()
 

@@ -1,8 +1,17 @@
-// The following methods unparse  AST nodes used in CSX Lite
-//  You will need to complete the methods to unparse all
-//    of CSX
-//  Be sure to extend method printOp to handle all CSX operators
-
+/***
+ * CS 536: PROJECT 3 - CSX SCANNER
+ *
+ * Caela Northey (cs login: caela)	905 653 2238 
+ * Alan Irish    (cs login: irish) 906 591 2819
+ *
+ *
+ * DUE DATE: FRIDAY NOV 1, 2013
+ *
+ * The following methods unparse  AST nodes used in CSX Lite
+ *  You will need to complete the methods to unparse all
+ *    of CSX
+ *  Be sure to extend method printOp to handle all CSX operators
+ ***/
 public class Unparsing extends Visitor {
 
 	static void genIndent(int indent){
@@ -19,12 +28,19 @@ public class Unparsing extends Visitor {
 		case sym.MINUS:
 			System.out.print(" - ");
 			break;
+		case sym.TIMES:
+			System.out.print(" * ");
+			break;
+		case sym.SLASH:
+			System.out.print(" / ");
+			break;
 		case sym.EQ:
 			System.out.print(" == ");
 			break;
 		case sym.NOTEQ:
 			System.out.print(" != ");
 			break;
+     /* GT, LT, etc */
 		default:
 			throw new Error();
 		}
@@ -71,12 +87,22 @@ public class Unparsing extends Visitor {
 	void visit(boolTypeNode n,int ident){
 		System.out.print("bool");
 	}
+ 	void visit(charTypeNode n,int ident){
+		System.out.print("char");
+	}
+	void visit(voidTypeNode n,int ident){
+		System.out.println("Unparsing for voidTypeNode not yet implemented");
+	}
 	void visit(identNode n,int indent){
 		System.out.print(n.idname);
 	}
-	// Extend nameNode's method to handle subscripts
+
+	// Extend nameNode's method to handle subscripts CHECK
 	void visit(nameNode n,int indent){
 		System.out.print(n.varName.idname);
+    if(n.subscriptVal != experNode.NULL){ //ie, is array
+			System.out.print("["+n.subscriptVal+"]");
+		}
 	}
 	void visit(asgNode n,int indent){
 		System.out.print(n.linenum + ":\t"); 
@@ -87,11 +113,11 @@ public class Unparsing extends Visitor {
 		System.out.println(";");
 	} 
 	void visit(incrementNode n,int indent){
-		System.out.println("Unparsing for incrementNode not yet implemented");
+		System.out.println(n.target.varName.idname+"++");
 	}
 
 	void visit(decrementNode n,int indent){
-		System.out.println("Unparsing for decrementNode not yet implemented");
+		System.out.println(n.target.varName.idname+"--");
 	}
 
 	// Extend ifThenNode's method to handle else parts
@@ -191,78 +217,109 @@ public class Unparsing extends Visitor {
 		System.out.println("Unparsing for arrayDeclNode not yet implemented");
 	}
 
-	void visit(charTypeNode n,int ident){
-		System.out.println("Unparsing for charTypeNode not yet implemented");
-	}
-	void visit(voidTypeNode n,int ident){
-		System.out.println("Unparsing for voidTypeNode not yet implemented");
-	}
-
+/** v caela v **/
 	void visit(whileNode n,int indent){
-		System.out.println("Unparsing for whileNode not yet implemented");
+		if(!n.label.isNull()){ //ie, if lable
+			this.visit(n.label,0); //indent should be 0?
+		}
+		System.out.print("while (");
+		this.visit(n.condition,0);
+		System.out.print(") {\n");
+		this.visit(n.loopBody,ident+1);
+		System.out.print("}\n");
+		
 	}
 
 	void visit(breakNode n,int indent){
-		System.out.println("Unparsing for breakNode not yet implemented");
+		if(!n.label.isNUll()){ //ie, if lable (identNode)
+			System.out.print(n.label.idname+" : ");
+		}
+		System.out.println("break;");
 	}
 	void visit(continueNode n,int indent){
-		System.out.println("Unparsing for continueNode not yet implemented");
+		if(!n.label.isNull()){ //ie, if lable (identNode)
+			System.out.print(n.label.idname+" : ");
+		}
+		System.out.println("continue;");
 	}
 
 	void visit(callNode n,int indent){
-		System.out.println("Unparsing for callNode not yet implemented");
+		System.out.print(n.methodName.idName+"(");
+		this.visit(n.args, 0); //will print nothing if null
+		System.out.print(")");
 	}
 
 
 	void visit(printNode n,int indent){
-		System.out.println("Unparsing for printNode not yet implemented");
+		this.visit(n.outputValue,0);
+		if(!n.morePrints.isNull()){
+			System.out.print(",");
+			this.visit(n.morePrints,0);
+		}
 	}
 
 	void visit(readNode n,int indent){
-		System.out.println("Unparsing for readNode not yet implemented");
+		this.visit(n.targetVar,0);
+		if(!n.moreReads.isNull()){
+			System.out.print(",");
+			this.visit(n.moreReads,0);
+		}
 	}
 
-
 	void visit(returnNode n,int indent){
-		System.out.println("Unparsing for returnNode not yet implemented");
+		System.out.print("return");
+		if(!n.returnVal.isNull()){
+			this.visit(n.returnVal,0);
+		}
+		System.out.println(";");
 	}
 
 
 	void visit(argsNode n,int indent){
-		System.out.println("Unparsing for argsNode not yet implemented");
+		this.visit(n.argVal,ident);
+		if(!n.moreArgs.isNull()){
+			System.out.print(", ");
+			this.visit(n.moreArgs);
+		}
 	}
 
 	void visit(nullArgsNode n,int indent){}
 
 	void visit(castNode n,int indent){
-		System.out.println("Unparsing for castNode not yet implemented");
+		System.out.print("(");
+		this.visit(n.resultType,0);
+		System.out.print(")");
+		this.visit(n.operand, 0);
 	}
 
 	void visit(fctCallNode n,int indent){
-		System.out.println("Unparsing for fctCallNode not yet implemented");
+		System.out.print(n.methodName.idname+"(");
+		this.visit(n.methodArgs);
+		System.out.print(")");
 	}
 
-	void visit(unaryOpNode n,int indent){
-		System.out.println("Unparsing for unaryOpNode not yet implemented");
+	void visit(unaryOpNode n,int indent){ //only 1 unary op = !
+		System.out.print("!");
+		this.visit(n.operand,0);
 	}
 
 
 	void visit(charLitNode n,int indent){
-		System.out.println("Unparsing for charLitNode not yet implemented");
+		System.out.print(n.charval);
 	}
 
 	void visit(strLitNode n,int indent){
-		System.out.println("Unparsing for strLitNode not yet implemented");
+		System.out.print(n.strval);
 	}
 
 
 	void visit(trueNode n,int indent){
-		System.out.println("Unparsing for trueNode not yet implemented");
+		System.out.println("true");
 	}
 
 	void visit(falseNode n,int indent){
-		System.out.println("Unparsing for falseNode not yet implemented");
+		System.out.print("false");
 	}
-
+/* ^ caela ^ */
 
 }
