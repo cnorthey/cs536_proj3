@@ -48,7 +48,7 @@ QUESTIONS::
  x difference b/w name and ident?
 	 -> both non terminals; ident is directly over IDENTIFIER terminal
       and then name is another abstraction over ident (to handle arrays)
- - what class is a 'pri' non terminal? also, what does it stand for?
+ - what class is a 'pri' non terminal? exprNode?
  x how to handle intlit, charlit, strlint;
 		-> like lite.cup handles 'intliteral', where intlit is a non term
        and goes to terminal INTLIT?
@@ -59,9 +59,15 @@ QUESTIONS::
  - how handle readlist and printlist? what nodes to create there?
    -> use readNode/printNode for readlist/printlist, but then how handle
       stmt -> rw_READ and rw_PRINT? additional new readNode/printNodes?
+      NOPE: what would first agr nameNode be??
  x difference b/w callNode and fctCallNode??
    -> related to stmt -> id ( ) vs unit -> id ( )?
    -> callNode extends stmtNode, and fctCallNode extends exprNode =>
       use callNode for stmt -> ident () and fctCallNode for
       unit -> ident ()
 
+
+Problems:
+	Shift/reduce errors currently caused by the logical expressions,
+		expr -> expr || term		and		expr -> expr && term
+	Currently commented out.

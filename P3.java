@@ -12,7 +12,7 @@
  *  The AST is then unparsed.
  *  Nothing needs to be changed here.
  * 
- */
+ ***/
 
 import java.io.*;
 import java_cup.runtime.*;
@@ -57,8 +57,7 @@ public class P3 {
   
     Unparsing unparse = new Unparsing();
     
-//    unparse.visit((csxLiteNode) root.value,0);
-    unparse.visit((classNode)root.value, 0);
+		unparse.visit((classNode)root.value,0);
 
     return;
     }

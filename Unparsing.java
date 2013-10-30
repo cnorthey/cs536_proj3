@@ -2,7 +2,7 @@
  * CS 536: PROJECT 3 - CSX SCANNER
  *
  * Caela Northey (cs login: caela)	905 653 2238 
- * Alan Irish    (cs login: irish) 906 591 2819
+ * Alan Irish    (cs login: irish) 	906 591 2819
  *
  *
  * DUE DATE: FRIDAY NOV 1, 2013
@@ -40,7 +40,30 @@ public class Unparsing extends Visitor {
 		case sym.NOTEQ:
 			System.out.print(" != ");
 			break;
-     /* GT, LT, etc */
+		case sym.CAND:
+			System.out.print(" && ");
+			break;
+		case sym.COR:
+			System.out.print(" || ");
+			break;
+		case sym.GEQ:
+			System.out.print(" >= ");
+			break;
+		case sym.GT:
+			System.out.print(" > ");
+			break;
+		case sym.LEQ:
+			System.out.print(" <= ");
+			break;
+		case sym.LT:
+			System.out.print(" < ");
+			break;
+		case sym.SLASH:
+			System.out.print(" / ");
+			break;
+		case sym.TIMES:
+			System.out.print(" * ");
+			break;
 		default:
 			throw new Error();
 		}
@@ -177,6 +200,7 @@ public class Unparsing extends Visitor {
 
 	void  visit(methodDeclsNode n,int indent){
 		this.visit(n.thisDecl, indent);
+		this.visit(n.moreDecls, indent);
 	}
 
 	void visit(nullStmtNode n,int indent){}
@@ -190,23 +214,33 @@ public class Unparsing extends Visitor {
 	void visit(nullMethodDeclsNode n,int indent){}
 
 	void visit(methodDeclNode n,int indent){
-		System.out.println("Unparsing for methodDeclNode not yet implemented");
+		this.visit(n.args, indent);
+		this.visit(n.decls, indent);
 	}
 
 
 	void visit(argDeclsNode n,int indent){
-		System.out.println("Unparsing for argDeclsNode not yet implemented");
+		this.visit(n.thisDecl, indent);
+		this.visit(n.moreDecls, indent);
 	}
 
 	void visit(nullArgDeclsNode n,int indent){}
 
 
 	void visit(valArgDeclNode n,int indent){
-		System.out.println("Unparsing for valArgDeclNode not yet implemented");
+		System.out.print(n.linenum+": ");
+		this.visit(n.argType, indent);
+		System.out.print(" ");
+		this.visit(n.argName, indent);
+		System.out.print("\n");
 	}
 
 	void visit(arrayArgDeclNode n,int indent){
-		System.out.println("Unparsing for arrayArgDeclNode not yet implemented");
+		System.out.print(n.linenum+": ");
+		this.visit(n.elementType, indent);
+		System.out.print(" ");
+		this.visit(n.argName, indent);
+		System.out.println("[]");
 	}
 
 	void visit(constDeclNode n,int indent){
