@@ -7,12 +7,58 @@ DUE DATE: FRIDAY NOV 1, 2013
 
 ********************************************************************************
 
+In this project, we are building the scanner component of the CSX language
+compiler. We will do this by writing a Java CUP parser specification file
+(i.e., csx.cup) that represents the language's context free grammer (see
+project description for full details). To test correctness, we will also
+implement an unparsing program that re-produces code from the AST generated
+by our CUP file.
+
+Relevant files:
+	- csx.cup: primary file; we started by modifying lite.cup, a file provided
+             for us as an example. It contained a simpler specification for
+             CSXlite which we build up to fully represent CSX. This involved
+             two main steps:
+
+             1) adding production rules to CUP specification
+             2) adding constructor actions to build AST
+
+	- Unparsing.java: again, this file was already sketched out for CSXlite,
+             we simply extended it to include the new node classes utilized
+             by csx.cup.
+
+	- P3.java: driver for the project (contains main() method).
+
+  - other files not modified but important: ast.java; csx.jlex (from P2)
+
+
 TO DO::
- - MAKE GIT REPOSITORY
- - replace csx.lite from project 2
+ x MAKE GIT REPOSITORY
+ x replace csx.lite from project 2
    -> add all symbols to lite.cup to properly generate sym.java
- - modify build.xml as needed
+ x modify build.xml as needed
  - build csx.cup
    -> add productions to CUP specifications
    -> add constructor actions to CUP to build AST
    -> complete unparsing methods for new nodes
+ - modify Unparsing.java
+ - modify driver P3.java
+
+QUESTIONS::
+ x difference b/w name and ident?
+	 -> both non terminals; ident is directly over IDENTIFIER terminal
+      and then name is another abstraction over ident (to handle arrays)
+ - what class is a 'pri' non terminal? also, what does it stand for?
+ x how to handle intlit, charlit, strlint;
+		-> like lite.cup handles 'intliteral', where intlit is a non term
+       and goes to terminal INTLIT?
+		   BUT: this is not in specs...matters?
+		-> alternatives? can have unit -> INTLIT, etc, terminals and create
+       new nodes there?
+		(going with second option for now b/c seems cleaner, fewer non terms)
+ - how handle readlist and printlist? what nodes to create there?
+   -> use readNode/printNode for readlist/printlist, but then how handle
+      stmt -> rw_READ and rw_PRINT? additional new readNode/printNodes?
+ - difference b/w callNode and fctCallNode??
+   -> related to stmt -> id ( ) vs unit -> id ( )?
+
