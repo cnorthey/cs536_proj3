@@ -62,3 +62,8 @@ QUESTIONS::
  - difference b/w callNode and fctCallNode??
    -> related to stmt -> id ( ) vs unit -> id ( )?
 
+
+Problems:
+	Shift/reduce errors currently caused by the logical expressions,
+		expr -> expr || term		and		expr -> expr && term
+	Currently commented out.
