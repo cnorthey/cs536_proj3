@@ -158,10 +158,7 @@ public class Unparsing extends Visitor {
 		else	System.out.print("~"+-n.intval);
 	}
 
-
-
-	// Extend these unparsing methods to correctly unparse CSX AST nodes
-
+	
 	void visit(classNode n,int indent){
 		System.out.println(n.linenum + ": class " + n.className.idname + " {");
 		this.visit(n.members, indent+1);

@@ -39,16 +39,16 @@
 		 </target>
 
  <target name ="test" depends="compile">
- 	<echo message="------- test using test.lite ----------">
+ 	<echo message="------- test using test.csx ----------">
  	     </echo>
    <java classpath="bin;." classname="P3" fork="true" >
-    <arg value="test.lite">
+    <arg value="test.csx">
     </arg>
    </java>
- 	<echo message="------- test using biggertest.lite ----------">
+ 	<echo message="------- test using test1.csx ----------">
  	 	     </echo>
  	   <java classpath="bin;." classname="P3" fork="true" >
- 	    <arg value="biggertest.lite">
+ 	    <arg value="test1.csx">
  	    </arg>
  	   </java>
  </target>
@@ -91,6 +91,10 @@
 		   <mkdir dir="bin">
 		   </mkdir>
 		   <java  classpath="src;bin;." classname="java_cup.Main" fork="true" input="csx.cup" > 
+		   		<arg value="-expect">
+		   		</arg>
+		   		<arg value="1">
+		   		</arg>
 		   </java>
 		    <move file="parser.java" todir="src">
 		    </move>

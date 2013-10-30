@@ -80,7 +80,7 @@ non terminal argsNodeOption			args;
 non terminal readNode				readlist;
 non terminal printNode				printlist;
 non terminal exprNode				pri; /* class type? */
-non terminal unaryOpNode			unary;
+non terminal exprNode				unary;
 non terminal nameNode				name;
 
 
@@ -220,10 +220,10 @@ stmt	::= rw_IF:i LPAREN expr:e RPAREN  stmt:s
 		{: 
 			RESULT=new ifThenNode(e, s, i.linenum, i.colnum); 
 		:}	
-/*
+
 		| rw_IF:i LPAREN expr:e RPAREN stmt:s rw_ELSE stmt
 			 {: RESULT=new ifThenNode(e,s, i.linenum,i.colnum); :}	
-*/	
+
 		| rw_WHILE:w LPAREN expr:e RPAREN stmt:s
 		{: 
 			RESULT = new whileNode(exprNode.NULL, e, s, w.linenum, w.colnum); 
@@ -248,17 +248,18 @@ stmt	::= rw_IF:i LPAREN expr:e RPAREN  stmt:s
 		{: 
 			RESULT = new decrementNode(n, n.linenum, n.colnum); 
 		:}
-/*
-		| rw_READ LPAREN readlist:rl RPAREN SEMI
-		{: 
-			RESULT = new readNode(); //??
-			:}
 
-		| rw_PRINT LPAREN printlist:pl RPAREN SEMI
+		| rw_READ:r LPAREN readlist:rl RPAREN SEMI
 		{: 
-			RESULT = new printNode(); //??
+			RESULT = new readNode(rl.targetVar, rl.moreReads, r.linenum, r.colnum);
 		:}
-*/
+
+		| rw_PRINT:r LPAREN printlist:pl RPAREN SEMI
+		{: 
+			RESULT = new printNode(pl.outputValue, pl.morePrints, r.linenum, r.colnum);
+
+		:}
+
 		| ident:id LPAREN RPAREN SEMI
 		{: 
 			RESULT = new callNode(id, argsNodeOption.NULL, id.linenum, id.colnum); 
@@ -344,33 +345,16 @@ printlist	::= expr:e COMMA printlist:pl
 			:}
 			;
 
-
-/*
-expr		::= expr:leftval PLUS:op unit:rightval
-			 {: RESULT=new binaryOpNode(leftval,sym.PLUS,rightval,op.linenum,op.colnum); :}	
-		| expr:leftval MINUS:op unit:rightval
-			 {: RESULT=new binaryOpNode(leftval,sym.MINUS,rightval,op.linenum,op.colnum); :}
-		| unit:leftval EQ:op unit:rightval
-			 {: RESULT=new binaryOpNode(leftval,sym.EQ,rightval,op.linenum,op.colnum); :}	
-		| unit:leftval NOTEQ:op unit:rightval
-			 {: RESULT=new binaryOpNode(leftval,sym.NOTEQ,rightval,op.linenum,op.colnum); :}
-		|   unit:u
-			{: RESULT = u; :}
-		;
-*/
-
-// Shift/Reduce conflicts caused by COR and CAND expressions??
-expr /*	::= expr:e1 COR expr:e2
+expr 	::= expr:e COR term:t
 		{:
-			RESULT = new binaryOpNode(e1, sym.COR, e2,e1.linenum,e1.colnum);
+			RESULT = new binaryOpNode(e, sym.COR, t, e.linenum, e.colnum);
 		:}
 		
-		|	expr:e1 CAND expr:e2
+		|	expr:e CAND term:t
 		{:
-			RESULT = new binaryOpNode(e1, sym.CAND,e2,e1.linenum,e1.colnum);
-		:}
-		*/
-		::=	term:t
+			RESULT = new binaryOpNode(e, sym.CAND,t, e.linenum, e.colnum);
+		:} 
+		|	term:t
 		{:
 			RESULT = t;
 		:}
@@ -430,12 +414,12 @@ factor	::=	factor:f PLUS pri:p
 
 pri 	::= pri:p TIMES unary:u
 		{:
-			RESULT = new binaryOpNode(p, u, sym.TIMES, p.linenum, p.colnum);
+			RESULT = new binaryOpNode(p, sym.TIMES, u, p.linenum, p.colnum);
 		:}
 		
 		| pri:p SLASH unary:u
 		{:
-			RESULT = new binaryOpNode(p, u, sym.SLASH, p.linenum, p.colnum);
+			RESULT = new binaryOpNode(p, sym.SLASH, u, p.linenum, p.colnum);
 		:}
 		
 		| unary:u
@@ -446,7 +430,7 @@ pri 	::= pri:p TIMES unary:u
 
 unary	::= NOT:n unary:u
 		{:
-			RESULT = new unaryOpNode(sym.NOT, );
+			RESULT = new unaryOpNode(sym.NOT, u, n.linenum, n.colnum);
 		:}
 		
 		| LPAREN:l type:t RPAREN unary:u
@@ -456,20 +440,9 @@ unary	::= NOT:n unary:u
 		
 		| unit:u
 		{:
-			RESULT = u; //????
+			RESULT = u; //???
 		:}
 		;
-
-/*
-unit    ::=	 LPAREN exp:e RPAREN 
-	   		 {: RESULT = e; :}
-     |  ident:i		
-			 {: RESULT = i; :}
-		 | intliteral:l
-	  	 {: RESULT = l; :}
-		;
-
-*/
 
 unit 	::= name:n
 		{:
@@ -478,12 +451,12 @@ unit 	::= name:n
 		
 		| ident:id LPAREN RPAREN
 		{:
-			RESULT = callNode(id, argsNodeOption.NULL, id.linenum, id.colnum);
+			RESULT = new fctCallNode(id, argsNode.NULL, id.linenum, id.colnum);
 		:}
 		
 		| ident:id LPAREN args:a RPAREN
 		{:
-			RESULT = callNode(id, a, id.linenum, id.colnum);
+			RESULT = new fctCallNode(id, a, id.linenum, id.colnum);
 		:}
 		
 		| INTLIT:i
