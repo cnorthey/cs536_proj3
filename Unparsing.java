@@ -70,20 +70,26 @@ public class Unparsing extends Visitor {
 	void visit(nullFieldDeclsNode n,int indent){}
 
 	void visit(stmtsNode n,int indent){
-		//System.out.println ("In stmtsNode\n");
 		this.visit(n.thisStmt,indent);
 		this.visit(n.moreStmts,indent);
-
 	}
+	
 	void visit(nullStmtsNode n,int indent){}
 
-	// Extend varDeclNode's method to handle initialization
 	void visit(varDeclNode n,int indent){
+		
 		System.out.print(n.linenum + ":\t");
 		genIndent(indent);
 		this.visit(n.varType,0);
 		System.out.print(" ");
 		this.visit(n.varName,0);
+		
+		//If the variable is initialized, print its value.
+		if(!n.initValue.isNull())	
+		{
+			System.out.print(" = ");
+			this.visit(n.initValue, indent);
+		}
 		System.out.println(";");
 	};
 
@@ -139,7 +145,7 @@ public class Unparsing extends Visitor {
 		genIndent(indent);
 		System.out.println("}");
 	}
-
+//TODO
 
 	void visit(binaryOpNode n,int indent){
 
@@ -167,7 +173,7 @@ public class Unparsing extends Visitor {
 
 	void  visit(memberDeclsNode n,int indent){
 		this.visit(n.fields, indent);
-		this.visit(n.methods, indent+1);
+		this.visit(n.methods, indent);
 	}
 
 	void  visit(methodDeclsNode n,int indent){
@@ -186,8 +192,18 @@ public class Unparsing extends Visitor {
 	void visit(nullMethodDeclsNode n,int indent){}
 
 	void visit(methodDeclNode n,int indent){
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
+		this.visit(n.returnType, indent);
+		this.visit(n.name, indent);
+		System.out.print(" (");
 		this.visit(n.args, indent);
-		this.visit(n.decls, indent);
+		System.out.println(") {");
+		this.visit(n.decls, indent+1);
+		this.visit(n.stmts, indent+1);
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
+		System.out.println("}");
 	}
 
 
@@ -200,15 +216,12 @@ public class Unparsing extends Visitor {
 
 
 	void visit(valArgDeclNode n,int indent){
-		System.out.print(n.linenum+": ");
 		this.visit(n.argType, indent);
 		System.out.print(" ");
 		this.visit(n.argName, indent);
-		System.out.print("\n");
 	}
 
 	void visit(arrayArgDeclNode n,int indent){
-		System.out.print(n.linenum+": ");
 		this.visit(n.elementType, indent);
 		System.out.print(" ");
 		this.visit(n.argName, indent);
@@ -216,18 +229,26 @@ public class Unparsing extends Visitor {
 	}
 
 	void visit(constDeclNode n,int indent){
-		System.out.println("Unparsing for constDeclNode not yet implemented");
+		System.out.print("const");
+		this.visit(n.constName, indent);
+		System.out.print(" = ");
+		this.visit(n.constValue, indent);
+		System.out.print(";");
 	}
 
 	void visit(arrayDeclNode n,int indent){
-		System.out.println("Unparsing for arrayDeclNode not yet implemented");
+		this.visit(n.elementType, indent);
+		this.visit(n.arrayName, indent);
+		System.out.print("[");
+		this.visit(n.arraySize, indent);
+		System.out.print("];");
 	}
 
 	void visit(charTypeNode n,int ident){
 		System.out.println("Unparsing for charTypeNode not yet implemented");
 	}
 	void visit(voidTypeNode n,int ident){
-		System.out.println("Unparsing for voidTypeNode not yet implemented");
+		System.out.print("void ");
 	}
 
 	void visit(whileNode n,int indent){
