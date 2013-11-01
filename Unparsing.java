@@ -145,7 +145,6 @@ public class Unparsing extends Visitor {
 		genIndent(indent);
 		System.out.println("}");
 	}
-//TODO
 
 	void visit(binaryOpNode n,int indent){
 
@@ -195,6 +194,7 @@ public class Unparsing extends Visitor {
 		System.out.print(n.linenum+":\t");
 		genIndent(indent);
 		this.visit(n.returnType, indent);
+		System.out.print(" ");
 		this.visit(n.name, indent);
 		System.out.print(" (");
 		this.visit(n.args, indent);
@@ -209,6 +209,8 @@ public class Unparsing extends Visitor {
 
 	void visit(argDeclsNode n,int indent){
 		this.visit(n.thisDecl, indent);
+		if(!n.moreDecls.isNull())
+			System.out.print(", ");
 		this.visit(n.moreDecls, indent);
 	}
 
@@ -225,30 +227,35 @@ public class Unparsing extends Visitor {
 		this.visit(n.elementType, indent);
 		System.out.print(" ");
 		this.visit(n.argName, indent);
-		System.out.println("[]");
+		System.out.print("[]");
 	}
 
 	void visit(constDeclNode n,int indent){
-		System.out.print("const");
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
+		System.out.print("const ");
 		this.visit(n.constName, indent);
 		System.out.print(" = ");
 		this.visit(n.constValue, indent);
-		System.out.print(";");
+		System.out.println(";");
 	}
 
 	void visit(arrayDeclNode n,int indent){
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
 		this.visit(n.elementType, indent);
+		System.out.print(" ");
 		this.visit(n.arrayName, indent);
 		System.out.print("[");
 		this.visit(n.arraySize, indent);
-		System.out.print("];");
+		System.out.println("];");
 	}
 
 	void visit(charTypeNode n,int ident){
-		System.out.println("Unparsing for charTypeNode not yet implemented");
+		System.out.print("char");
 	}
 	void visit(voidTypeNode n,int ident){
-		System.out.print("void ");
+		System.out.print("void");
 	}
 
 	void visit(whileNode n,int indent){
@@ -269,6 +276,7 @@ public class Unparsing extends Visitor {
 
 	void visit(printNode n,int indent){
 		System.out.println("Unparsing for printNode not yet implemented");
+		
 	}
 
 	void visit(readNode n,int indent){
@@ -301,7 +309,20 @@ public class Unparsing extends Visitor {
 
 
 	void visit(charLitNode n,int indent){
-		System.out.println("Unparsing for charLitNode not yet implemented");
+		System.out.print('\'');
+		switch (n.charval) {
+			case '\\':
+				System.out.print("\\\\"); break;
+			case '\'':
+				System.out.print("\\\'"); break;
+			case '\t':
+				System.out.print("\\t"); break;
+			case '\n':
+				System.out.print("\\n"); break;
+			default:
+				System.out.print(n.charval);
+		}
+		System.out.print('\'');
 	}
 
 	void visit(strLitNode n,int indent){
