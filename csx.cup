@@ -259,13 +259,12 @@ stmt	::= rw_IF:i LPAREN expr:e RPAREN  stmt:s
 
 		| rw_READ:r LPAREN readlist:rl RPAREN SEMI
 		{: 
-			RESULT = new readNode(rl.targetVar, rl.moreReads, r.linenum, r.colnum);
+			RESULT = new readNode(new nameNode(new identNode("first" , -1, r.colnum),r.linenum, r.colnum), rl, r.linenum, r.colnum);
 			:}
 
 		| rw_PRINT:p LPAREN printlist:pl RPAREN SEMI
 		{: 
-			RESULT = new printNode(pl.outputValue, pl.morePrints, 
-                  p.linenum, p.colnum);
+			RESULT = new printNode(new strLitNode("first" , -1, p.colnum), pl, p.linenum, p.colnum);
 		:}
 
 		| ident:id LPAREN RPAREN SEMI
