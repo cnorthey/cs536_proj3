@@ -91,10 +91,10 @@
 		   <mkdir dir="bin">
 		   </mkdir>
 		   <java  classpath="src;bin;." classname="java_cup.Main" fork="true" input="csx.cup" > 
-				<arg value="-expect">
-				</arg>
-				<arg value="1">
-				</arg>
+		   		<arg value="-expect">
+		   		</arg>
+		   		<arg value="1">
+		   		</arg>
 		   </java>
 		    <move file="parser.java" todir="src">
 		    </move>

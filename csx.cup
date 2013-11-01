@@ -231,7 +231,7 @@ stmt	::= rw_IF:i LPAREN expr:e RPAREN  stmt:s
 
 		| rw_IF:i LPAREN expr:e RPAREN stmt:s rw_ELSE stmt
 			 {: RESULT=new ifThenNode(e,s, i.linenum,i.colnum); :}	
-	
+
 		| rw_WHILE:w LPAREN expr:e RPAREN stmt:s
 		{: 
 			RESULT = new whileNode(exprNode.NULL, e, s, w.linenum, w.colnum); 
@@ -353,18 +353,16 @@ printlist	::= expr:e COMMA printlist:pl
 			:}
 			;
 
-// Shift/Reduce conflicts caused by COR and CAND expressions??
-expr 	::= expr:e1 COR term:e2
+expr 	::= expr:e COR term:t
 		{:
-			RESULT = new binaryOpNode(e1, sym.COR, e2,e1.linenum,e1.colnum);
+			RESULT = new binaryOpNode(e, sym.COR, t, e.linenum, e.colnum);
 		:}
 		
-		|	expr:e1 CAND term:e2
+		|	expr:e CAND term:t
 		{:
-			RESULT = new binaryOpNode(e1, sym.CAND,e2,e1.linenum,e1.colnum);
-		:}
-
-		| term:t
+			RESULT = new binaryOpNode(e, sym.CAND,t, e.linenum, e.colnum);
+		:} 
+		|	term:t
 		{:
 			RESULT = t;
 		:}
@@ -450,7 +448,7 @@ unary	::= NOT:n unary:u
 		
 		| unit:u
 		{:
-			RESULT = u; //????
+			RESULT = u; //???
 		:}
 		;
 
