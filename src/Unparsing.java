@@ -1,7 +1,7 @@
 /***
- * CS 536: PROJECT 3 - CSX SCANNER
+ * CS 536: PROJECT 3 - CSX PARSER
  *
- * Caela Northey (cs login: caela)	905 653 2238 
+ * Caela Northey (cs login: caela)	905 653 2238 con
  * Alan Irish    (cs login: irish) 	906 591 2819
  *
  *
@@ -11,15 +11,15 @@
  *  You will need to complete the methods to unparse all
  *    of CSX
  *  Be sure to extend method printOp to handle all CSX operators
+ *
  ***/
 public class Unparsing extends Visitor {
 
 	static void genIndent(int indent){
 		for (int i=1;i<=indent;i++)
-			//			System.out.print("\t");
 			System.out.print("   ");
 	}
-	// Extend this to handle all CSX binary operators
+	// Extend this to handle all CSX binary operators CHECK
 	static void printOp(int op) {
 		switch (op) {
 		case sym.PLUS:
@@ -63,9 +63,7 @@ public class Unparsing extends Visitor {
 		}
 	}
 
-
 	void visit(csxLiteNode n,int indent){
-		//System.out.println ("\n\nStart 2nd unparsing:\n"); 
 		System.out.println(n.linenum + ":\t" + " {");
 		this.visit(n.progDecls,1);
 		this.visit(n.progStmts,1);
@@ -89,9 +87,9 @@ public class Unparsing extends Visitor {
 		
 		System.out.print(n.linenum + ":\t");
 		genIndent(indent);
-		this.visit(n.varType,0);
+		this.visit(n.varType,indent);
 		System.out.print(" ");
-		this.visit(n.varName,0);
+		this.visit(n.varName,indent);
 		
 		//If the variable is initialized, print its value.
 		if(!n.initValue.isNull())	
@@ -110,50 +108,55 @@ public class Unparsing extends Visitor {
 	void visit(boolTypeNode n,int ident){
 		System.out.print("bool ");
 	}
- 	void visit(charTypeNode n,int ident){
-		System.out.print("char ");
-	}
-	void visit(voidTypeNode n,int ident){
-		System.out.print("void ");
-	}
+
 	void visit(identNode n,int indent){
 		System.out.print(n.idname);
 	}
 
 	// Extend nameNode's method to handle subscripts CHECK
 	void visit(nameNode n,int indent){
-		this.visit(n.varName,0);
+		this.visit(n.varName,indent);
     if(n.subscriptVal != exprNode.NULL){ //ie, is array
 			System.out.print("[");
-			this.visit(n.subscriptVal,0);
+			this.visit(n.subscriptVal,indent);
 			System.out.print("]");
 		}
 	}
 	void visit(asgNode n,int indent){
 		System.out.print(n.linenum + ":\t"); 
 		genIndent(indent);
-		this.visit(n.target,0);
+		this.visit(n.target,indent);
 		System.out.print(" = ");
-		this.visit(n.source,0);
-		System.out.print(";");
+		this.visit(n.source,indent);
+		System.out.print(";\n");
 	} 
 	void visit(incrementNode n,int indent){
-		System.out.println(n.target.varName.idname+"++");
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
+		System.out.println(n.target.varName.idname+"++;");
 	}
 
 	void visit(decrementNode n,int indent){
-		System.out.println(n.target.varName.idname+"--");
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
+		System.out.println(n.target.varName.idname+"--;");
 	}
 
-	// Extend ifThenNode's method to handle else parts
+	// Extend ifThenNode's method to handle else parts CHECK
 	void visit(ifThenNode n,int indent){
 		System.out.print(n.linenum + ":\t");
 		genIndent(indent);
 		System.out.print("if (");
-		this.visit(n.condition,0);
+		this.visit(n.condition,indent);
 		System.out.println(")");
 		this.visit(n.thenPart,indent+1);
-		// No else parts in CSXlite
+		if(!n.elsePart.isNull()){
+			System.out.print(n.linenum + ":\t");
+			genIndent(indent);
+			System.out.println("else");
+			this.visit(n.elsePart, indent+1);
+		}
+
 	}
 
 	void visit(blockNode n,int indent){
@@ -168,11 +171,10 @@ public class Unparsing extends Visitor {
 	}
 
 	void visit(binaryOpNode n,int indent){
-
 		System.out.print("(");
-		this.visit(n.leftOperand,0);
+		this.visit(n.leftOperand,indent);
 		printOp(n.operatorCode);
-		this.visit(n.rightOperand,0);
+		this.visit(n.rightOperand,indent);
 		System.out.print(")");
 	}
 
@@ -182,7 +184,6 @@ public class Unparsing extends Visitor {
 		else	System.out.print("~"+-n.intval);
 	}
 
-	
 	void visit(classNode n,int indent){
 		System.out.println(n.linenum + ": class " + n.className.idname + " {");
 		this.visit(n.members, indent+1);
@@ -213,6 +214,7 @@ public class Unparsing extends Visitor {
 		System.out.print(n.linenum+":\t");
 		genIndent(indent);
 		this.visit(n.returnType, indent);
+		System.out.print(" ");
 		this.visit(n.name, indent);
 		System.out.print(" (");
 		this.visit(n.args, indent);
@@ -224,130 +226,150 @@ public class Unparsing extends Visitor {
 		System.out.println("}");
 	}
 
-
 	void visit(argDeclsNode n,int indent){
 		this.visit(n.thisDecl, indent);
+		if(!n.moreDecls.isNull())
+			System.out.print(", ");
 		this.visit(n.moreDecls, indent);
 	}
 
 	void visit(nullArgDeclsNode n,int indent){}
 
-
 	void visit(valArgDeclNode n,int indent){
 		this.visit(n.argType, indent);
-		System.out.print(" ");
 		this.visit(n.argName, indent);
 	}
 
 	void visit(arrayArgDeclNode n,int indent){
 		this.visit(n.elementType, indent);
-		System.out.print(" ");
 		this.visit(n.argName, indent);
-		System.out.println("[]");
+		System.out.print("[]");
 	}
 
 	void visit(constDeclNode n,int indent){
-		System.out.print("CONST ");
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
+		System.out.print("const ");
 		this.visit(n.constName, indent);
 		System.out.print(" = ");
 		this.visit(n.constValue, indent);
-		System.out.print(";");
+		System.out.println(";");
 	}
 
 	void visit(arrayDeclNode n,int indent){
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
 		this.visit(n.elementType, indent);
 		this.visit(n.arrayName, indent);
 		System.out.print("[");
 		this.visit(n.arraySize, indent);
-		System.out.print("];");
+		System.out.println("];");
+	}
+
+	void visit(charTypeNode n,int ident){
+		System.out.print("char");
+	}
+	void visit(voidTypeNode n,int ident){
+		System.out.print("void");
 	}
 
 	void visit(whileNode n,int indent){
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
 		if(!n.label.isNull()){ //ie, if lable
-			this.visit(n.label,0); //indent should be 0?
+			this.visit(n.label,indent);
+			System.out.print(": ");
 		}
 		System.out.print("while (");
-		this.visit(n.condition,0);
-		System.out.print(") {\n");
+		this.visit(n.condition,indent);
+		System.out.print(")\n");
 		this.visit(n.loopBody,indent+1);
-		System.out.print("}\n");
 		
 	}
 
 	void visit(breakNode n,int indent){
-		System.out.println("break ");
-		this.visit(n.label,0);
+		System.out.print(n.linenum + ":\t");
+		genIndent(indent);
+		System.out.print("break ");
+		this.visit(n.label,indent);
+		System.out.println(";");
 	}
+
 	void visit(continueNode n,int indent){
-		System.out.println("continue ");
-		this.visit(n.label,0);
+		System.out.print(n.linenum + ":\t");
+		genIndent(indent);
+		System.out.print("continue ");
+		this.visit(n.label,indent);
+		System.out.println(";");
 	}
 
 	void visit(callNode n,int indent){
-		this.visit(n.methodName,0);
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
+		this.visit(n.methodName,indent);
 		System.out.print("(");
-		this.visit(n.args, 0); //will print nothing if null
-		System.out.print(")");
+		this.visit(n.args, indent); //will print nothing if null
+		System.out.print(");\n");
 	}
-
 
 	void visit(printNode n,int indent){
 		if(n.outputValue.linenum==-1){
-			System.out.print(n.colnum+":\t");
+			System.out.print(n.linenum+":\t");
 			genIndent(indent);
 			System.out.print("print(");
 			if(!n.morePrints.isNull()){
-				this.visit(n.morePrints,0);
+				this.visit(n.morePrints,indent);
 			}else{ //ie, done printing
-				System.out.print(")");
+				System.out.print(");\n");
 			}
 		}else{
-			this.visit(n.outputValue,0);
+			this.visit(n.outputValue,indent);
 			if(!n.morePrints.isNull()){
 				System.out.print(", ");
-				this.visit(n.morePrints,0);
+				this.visit(n.morePrints,indent);
 			}else{ //ie, done printing
-				System.out.print(")");
+				System.out.print(");\n");
 			}
 		}
 	}
 
 	void visit(readNode n,int indent){
 		if(n.targetVar.varName.linenum==-1){
-			System.out.print(n.colnum+":\t");
+			System.out.print(n.linenum+":\t");
 			genIndent(indent);
 			System.out.print("read(");
 			if(!n.moreReads.isNull()){
-				System.out.print(", ");
-				this.visit(n.moreReads,0);
+				this.visit(n.moreReads,indent);
 			}else{ //ie, done reading
-				System.out.print(")");
+				System.out.print(");\n");
 			}
 		}else{
-			this.visit(n.targetVar,0);
+			this.visit(n.targetVar,indent);
 			if(!n.moreReads.isNull()){
 				System.out.print(", ");
-				this.visit(n.moreReads,0);
+				this.visit(n.moreReads,indent);
 			}else{ //ie, done reading
-				System.out.print(")");
+				System.out.print(");\n");
 			}
 		}
 	}
 
 	void visit(returnNode n,int indent){
+		System.out.print(n.linenum+":\t");
+		genIndent(indent);
 		System.out.print("return");
 		if(!n.returnVal.isNull()){
-			this.visit(n.returnVal,0);
+			System.out.print(" ");
+			this.visit(n.returnVal,indent);
 		}
 		System.out.println(";");
 	}
 
-
 	void visit(argsNode n,int indent){
-		this.visit(n.argVal,0);
+		this.visit(n.argVal,indent);
 		if(!n.moreArgs.isNull()){
 			System.out.print(", ");
-			this.visit(n.moreArgs,0);
+			this.visit(n.moreArgs,indent);
 		}
 	}
 
@@ -355,32 +377,43 @@ public class Unparsing extends Visitor {
 
 	void visit(castNode n,int indent){
 		System.out.print("(");
-		this.visit(n.resultType,0);
+		this.visit(n.resultType,indent);
 		System.out.print(")");
-		this.visit(n.operand, 0);
+		this.visit(n.operand, indent);
 	}
 
 	void visit(fctCallNode n,int indent){
-		this.visit(n.methodName,0);
+		this.visit(n.methodName,indent);
 		System.out.print("(");
-		this.visit(n.methodArgs,0);
+		this.visit(n.methodArgs,indent);
 		System.out.print(")");
 	}
 
 	void visit(unaryOpNode n,int indent){ //only 1 unary op = !
 		System.out.print("!");
-		this.visit(n.operand,0);
+		this.visit(n.operand,indent);
 	}
 
-
 	void visit(charLitNode n,int indent){
-		System.out.print(n.charval);
+		System.out.print('\'');
+		switch (n.charval) {
+			case '\\':
+				System.out.print("\\\\"); break;
+			case '\'':
+				System.out.print("\\\'"); break;
+			case '\t':
+				System.out.print("\\t"); break;
+			case '\n':
+				System.out.print("\\n"); break;
+			default:
+				System.out.print(n.charval);
+		}
+		System.out.print('\'');
 	}
 
 	void visit(strLitNode n,int indent){
 		System.out.print(n.strval);
 	}
-
 
 	void visit(trueNode n,int indent){
 		System.out.print("true");
